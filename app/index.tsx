@@ -1,9 +1,107 @@
-import { Text, View } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
+import BottomSheet from '@gorhom/bottom-sheet';
+import React, { useCallback, useRef } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import FilterSheet from './components/filter/FilterSheet';
+import MatchList from './components/match/MatchList';
+import { useFilter } from './context/FilterContext';
+import { useMatches } from './hooks/useMatches';
+import { COLORS } from './utils/constants';
 
 export default function Index() {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const { selectedTournamentIds, clearFilters, isFilterActive } = useFilter();
+
+  const {
+    matches,
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useMatches({
+    tournamentIds: selectedTournamentIds,
+  });
+
+  const handleOpenFilter = useCallback(() => {
+    bottomSheetRef.current?.snapToIndex(0);
+  }, []);
+
+  const handleCloseFilter = useCallback(() => {
+    bottomSheetRef.current?.close();
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleClearFilters = useCallback(() => {
+    clearFilters();
+  }, [clearFilters]);
+
   return (
-    <View className="flex-1 bg-white">
-      <Text className="text-lg font-semibold">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ullam maiores ut molestiae fugiat voluptatum iure nobis illo explicabo ipsum, rerum, nesciunt, libero repudiandae est impedit nisi. Quam omnis autem veniam ullam quos, esse molestias soluta debitis itaque maxime alias laboriosam nam fuga distinctio id fugit provident magni in sapiente! Ipsa sit nobis repellat veritatis incidunt numquam in porro debitis alias similique, molestiae dolorem illum mollitia odio non quibusdam qui id ea? Quo omnis, voluptatem officiis placeat, expedita reiciendis atque voluptate impedit sunt eum optio molestias ad illum dolor nobis! Illo, beatae quisquam quos ipsum recusandae optio corporis dicta saepe libero ullam eum fugit at porro facere? Voluptates cupiditate nulla ipsam aut, inventore maiores tenetur? Maxime mollitia culpa perferendis. Veritatis quia, explicabo odio molestias, sapiente accusantium non, quasi eligendi id in reiciendis! Ipsum, culpa assumenda. Dolore blanditiis aliquam iure sit ullam libero debitis nemo? Beatae eaque amet aliquid sapiente quam ex reiciendis! Porro pariatur expedita id aliquid possimus modi, eum harum maxime sit perspiciatis commodi aperiam libero deleniti iste molestias. Sit ducimus in laborum error molestiae, vero sapiente laboriosam sint eveniet, voluptatem at illum incidunt delectus, repellat eligendi dolorum. Cumque, nisi labore incidunt harum magnam quidem cum ab commodi veritatis minima enim fugit, velit similique. Nulla officiis laborum beatae adipisci, ut perferendis soluta aperiam? Id similique distinctio tempora molestiae ducimus laborum! Repudiandae, fugiat fuga repellendus sint consectetur labore accusamus rerum nulla, dolor, illo quis! Itaque possimus consequatur quae, quis omnis sint quia incidunt sapiente non vel obcaecati dolor qui praesentium eius. Hic harum obcaecati nisi a aspernatur consequuntur praesentium alias repellat animi amet non deleniti reprehenderit, ducimus excepturi cumque nobis qui ipsam unde dolorem cupiditate placeat! Pariatur quo nobis, doloribus totam velit, alias nemo atque quas eaque blanditiis nesciunt rem aut incidunt aliquam tempore quasi eum eos! Ratione quam soluta velit, quo quod excepturi nisi, atque quaerat blanditiis dolorum nobis voluptas temporibus mollitia voluptate quia placeat! Animi, earum! Dolorum odit a adipisci libero in tempore accusamus fugit aperiam laudantium quam inventore, recusandae nemo. Magni sint at tenetur aliquam perspiciatis cum esse possimus quasi harum. Quod facere obcaecati quis porro repudiandae aut unde et consectetur, ea, quasi quos voluptatem incidunt ducimus laboriosam nobis asperiores aspernatur atque, quam voluptates. Magni tempore voluptate ex a deserunt tenetur dicta! Quod similique nihil nam sint atque veniam quis fugit, error eum nobis laboriosam? Accusantium necessitatibus aspernatur tenetur quam nesciunt repudiandae in velit, ducimus maxime eligendi tempore, eius, assumenda praesentium voluptatem commodi impedit accusamus iste esse repellendus? Laboriosam praesentium eius eveniet ab quaerat, velit, veniam repudiandae, commodi voluptatum recusandae tempora cupiditate dignissimos quam placeat voluptatem odio dolores nam accusamus maiores asperiores sapiente delectus. Adipisci repellat neque repellendus officiis ea eaque aliquam totam debitis quis non, illum porro eius ex provident iusto sequi ipsam, dolorum blanditiis velit. Dicta temporibus sit et eos autem dolor, ab reprehenderit quisquam obcaecati fugit exercitationem ipsam fugiat animi ullam illum eveniet quasi voluptas. Impedit, tempora dolorem? Hic minus amet at suscipit, sequi blanditiis ipsa doloremque! Nostrum quasi inventore laboriosam optio quidem magnam recusandae.</Text>
+    <View className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="bg-white px-4 py-4 border-b border-gray-200">
+        <View className="flex-row items-center justify-between">
+          <View>
+            <Text className="text-2xl font-bold text-gray-900">Matches</Text>
+            <Text className="text-sm text-gray-500 mt-1">
+              {isLoading && matches.length === 0
+                ? 'Loading...'
+                : `${matches.length} matches found`}
+            </Text>
+          </View>
+          <Pressable
+            onPress={handleOpenFilter}
+            className="flex-row items-center px-4 py-2 rounded-lg"
+            style={{
+              backgroundColor: isFilterActive ? `${COLORS.primary}15` : '#f3f4f6',
+            }}
+          >
+            <Ionicons
+              name="filter"
+              size={18}
+              color={isFilterActive ? COLORS.primary : '#666'}
+            />
+            <Text
+              className="ml-2 font-semibold"
+              style={{ color: isFilterActive ? COLORS.primary : '#666' }}
+            >
+              Filter
+            </Text>
+            {isFilterActive && (
+              <View
+                className="ml-2 w-5 h-5 rounded-full items-center justify-center"
+                style={{ backgroundColor: COLORS.primary }}
+              >
+                <Text className="text-white text-xs font-bold">
+                  {selectedTournamentIds.length}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Match List */}
+      <MatchList
+        matches={matches}
+        isLoading={isLoading}
+        isError={isError}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        onRefresh={refetch}
+        onLoadMore={handleLoadMore}
+        onClearFilters={handleClearFilters}
+        isFiltered={isFilterActive}
+      />
+
+      {/* Filter Bottom Sheet */}
+      <FilterSheet bottomSheetRef={bottomSheetRef} onClose={handleCloseFilter} />
     </View>
   );
 }
