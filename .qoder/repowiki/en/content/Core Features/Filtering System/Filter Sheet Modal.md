@@ -8,11 +8,16 @@
 - [index.tsx](file://app/index.tsx)
 - [_layout.tsx](file://app/_layout.tsx)
 - [useTournaments.ts](file://app/hooks/useTournaments.ts)
-- [tournamentApi.ts](file://app/services/tournamentApi.ts)
 - [constants.ts](file://app/utils/constants.ts)
-- [tournament.ts](file://app/types/tournament.ts)
-- [MatchList.tsx](file://app/components/match/MatchList.tsx)
+- [haptics.ts](file://app/utils/haptics.ts)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated responsive design section to reflect useSafeAreaInsets integration
+- Modified bottom sheet configuration to show fixed pixel snap points
+- Updated footer spacing and container layout documentation
+- Enhanced mobile responsiveness documentation with safe area handling
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -34,6 +39,7 @@ The component serves as a central hub for tournament filtering, allowing users t
 - Apply or reset filters
 - Navigate through loading and error states
 - Experience smooth bottom sheet animations and gestures
+- Benefit from enhanced mobile responsiveness with safe area handling
 
 ## Project Structure
 The FilterSheet implementation spans several key files that demonstrate a clean separation of concerns:
@@ -47,40 +53,36 @@ FC[FilterContext.tsx]
 end
 subgraph "Data Layer"
 UT[useTournaments.ts]
-TA[tournamentApi.ts]
-TT[tournament.ts]
+CTS[constants.ts]
+HT[haptics.ts]
 end
 subgraph "UI Integration"
 IDX[index.tsx]
-ML[MatchList.tsx]
 LYT[_layout.tsx]
 end
 subgraph "Utilities"
-CTS[constants.ts]
 end
 IDX --> FS
 FS --> FC
 FS --> SS
 FS --> UT
-UT --> TA
-TA --> TT
 SS --> CTS
-ML --> IDX
+SS --> HT
 LYT --> FC
 ```
 
 **Diagram sources**
-- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L1-L128)
+- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L1-L130)
 - [FilterContext.tsx](file://app/context/FilterContext.tsx#L1-L72)
 - [SportSection.tsx](file://app/components/filter/SportSection.tsx#L1-L82)
 - [useTournaments.ts](file://app/hooks/useTournaments.ts#L1-L45)
-- [tournamentApi.ts](file://app/services/tournamentApi.ts#L1-L35)
+- [constants.ts](file://app/utils/constants.ts#L1-L38)
+- [haptics.ts](file://app/utils/haptics.ts#L1-L33)
 - [index.tsx](file://app/index.tsx#L1-L108)
-- [MatchList.tsx](file://app/components/match/MatchList.tsx#L1-L117)
 - [_layout.tsx](file://app/_layout.tsx#L1-L35)
 
 **Section sources**
-- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L1-L128)
+- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L1-L130)
 - [FilterContext.tsx](file://app/context/FilterContext.tsx#L1-L72)
 - [index.tsx](file://app/index.tsx#L1-L108)
 
@@ -89,17 +91,17 @@ The FilterSheet implementation consists of three primary components working toge
 
 ### FilterSheet Component
 The main bottom sheet container that manages:
-- Bottom sheet configuration and gesture handling
-- Tournament data loading and display
-- Filter application and clearing
-- Header, content, and footer layouts
+- Bottom sheet configuration and gesture handling with enhanced mobile responsiveness
+- Tournament data loading and display with safe area integration
+- Filter application and clearing with refined footer spacing
+- Header, content, and footer layouts with improved responsive design
 
 ### SportSection Component
 Individual sport category renderer that:
-- Displays sport metadata with color coding
-- Renders tournament lists with selection indicators
-- Handles individual tournament toggling
-- Provides visual feedback for selected items
+- Displays sport metadata with color coding from constants
+- Renders tournament lists with selection indicators and haptic feedback
+- Handles individual tournament toggling with tactile response
+- Provides visual feedback for selected items with enhanced touch targets
 
 ### FilterContext Provider
 State management system that:
@@ -122,13 +124,12 @@ participant User as User Interaction
 participant FS as FilterSheet
 participant FC as FilterContext
 participant UT as useTournaments
-participant TA as tournamentApi
 participant IDX as Parent Component
 User->>FS : Open Bottom Sheet
 FS->>UT : Fetch tournaments data
-UT->>TA : Request sports data
-TA-->>UT : Return sports with tournaments
-UT-->>FS : Provide sports data
+FS->>FS : Apply safe area insets
+FS->>FS : Configure fixed pixel snap points
+FS->>FS : Render with enhanced responsive design
 FS->>FC : Update pending filters
 User->>FS : Toggle tournament selection
 FS->>FC : toggleTournament(id)
@@ -142,10 +143,50 @@ IDX->>FS : Close bottom sheet
 - [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L17-L39)
 - [FilterContext.tsx](file://app/context/FilterContext.tsx#L26-L43)
 - [useTournaments.ts](file://app/hooks/useTournaments.ts#L14-L28)
-- [tournamentApi.ts](file://app/services/tournamentApi.ts#L4-L34)
 - [index.tsx](file://app/index.tsx#L27-L33)
 
 ## Detailed Component Analysis
+
+### Enhanced Mobile Responsiveness and Safe Area Handling
+The FilterSheet now incorporates comprehensive mobile responsiveness with safe area handling for devices with notches and varying screen sizes:
+
+```mermaid
+classDiagram
+class SafeAreaIntegration {
++useSafeAreaInsets() : object
++bottomInset calculation : number
++responsive padding adjustments
++notch compatibility
+}
+class BottomSheetConfig {
++snapPoints : number[]
++enablePanDownToClose : boolean
++index : number
++backgroundStyle : object
++handleIndicatorStyle : object
++bottomInset : number
+}
+class ResponsiveDesign {
++fixed pixel sizing : [300, 500]
++safe area awareness
++adaptive content padding
++consistent spacing across devices
+}
+SafeAreaIntegration --> BottomSheetConfig : "provides insets"
+ResponsiveDesign --> BottomSheetConfig : "enhances configuration"
+```
+
+**Diagram sources**
+- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L18-L63)
+
+**Updated** Enhanced mobile responsiveness with useSafeAreaInsets hook integration and fixed pixel snap point configuration
+
+Key responsive design features:
+- **Safe Area Integration**: Uses `useSafeAreaInsets()` hook to calculate dynamic bottom inset values
+- **Fixed Pixel Snap Points**: Changed from percentage-based ('50%' and '85%') to precise pixel values ([300, 500])
+- **Adaptive Bottom Padding**: `bottomInset={insets.bottom + 70}` ensures proper spacing for devices with notches
+- **Consistent Sizing**: Fixed pixel values provide predictable behavior across different screen sizes
+- **Notch Compatibility**: Proper handling of device-specific safe areas for iPhone X and newer models
 
 ### Bottom Sheet Configuration and Behavior
 The FilterSheet utilizes @gorhom/bottom-sheet with carefully configured gesture handling and animation parameters:
@@ -153,11 +194,12 @@ The FilterSheet utilizes @gorhom/bottom-sheet with carefully configured gesture 
 ```mermaid
 classDiagram
 class BottomSheetConfig {
-+snapPoints : string[]
++snapPoints : number[]
 +enablePanDownToClose : boolean
 +index : number
 +backgroundStyle : object
 +handleIndicatorStyle : object
++bottomInset : number
 }
 class FilterSheet {
 +bottomSheetRef : RefObject
@@ -176,13 +218,16 @@ FilterSheet --> GestureHandling : "implements"
 ```
 
 **Diagram sources**
-- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L26-L62)
+- [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L27-L63)
+
+**Updated** Changed snap point configuration from percentages to fixed pixel values for enhanced consistency
 
 Key configuration aspects:
-- **Snap Points**: Uses percentage-based sizing ('50%' and '85%') for adaptive height
-- **Gesture Handling**: Enables pan-down-to-close functionality
-- **Animation**: Leverages native bottom sheet animations
-- **Visual Indicators**: Custom handle indicator styling for better UX
+- **Snap Points**: Now uses fixed pixel values ([300, 500]) instead of percentage-based sizing
+- **Gesture Handling**: Enables pan-down-to-close functionality with enhanced responsive behavior
+- **Animation**: Leverages native bottom sheet animations with improved performance
+- **Visual Indicators**: Custom handle indicator styling for better UX with consistent sizing
+- **Safe Area Awareness**: Integrates with useSafeAreaInsets for proper device-specific spacing
 
 ### Filter State Management
 The FilterContext implements a dual-state pattern for seamless filter operations:
@@ -239,7 +284,6 @@ ResetState --> RenderList
 
 **Diagram sources**
 - [useTournaments.ts](file://app/hooks/useTournaments.ts#L14-L43)
-- [tournamentApi.ts](file://app/services/tournamentApi.ts#L4-L34)
 
 **Section sources**
 - [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L16-L125)
@@ -247,24 +291,26 @@ ResetState --> RenderList
 - [SportSection.tsx](file://app/components/filter/SportSection.tsx#L15-L76)
 
 ### User Interaction Patterns
-The FilterSheet implements comprehensive user interaction patterns:
+The FilterSheet implements comprehensive user interaction patterns with enhanced mobile responsiveness:
 
 #### Gesture-Based Navigation
-- **Swipe-to-Dismantle**: Pan down gesture closes the sheet
-- **Drag Handle**: Visual handle indicator for intuitive dragging
-- **Edge Cases**: Prevents accidental dismissals during content interaction
+- **Swipe-to-Dismantle**: Pan down gesture closes the sheet with proper safe area consideration
+- **Drag Handle**: Visual handle indicator for intuitive dragging with consistent sizing
+- **Edge Cases**: Prevents accidental dismissals during content interaction with responsive behavior
 
 #### Selection Feedback
-- **Visual Indicators**: Checkmark icons for selected tournaments
-- **Color Coding**: Sport-specific colors for better categorization
-- **Haptic Feedback**: Light haptic responses for tactile feedback
-- **State Persistence**: Maintains selection state across interactions
+- **Visual Indicators**: Checkmark icons for selected tournaments with enhanced touch targets
+- **Color Coding**: Sport-specific colors from constants for better categorization
+- **Haptic Feedback**: Light haptic responses using triggerLightHaptic for tactile feedback
+- **State Persistence**: Maintains selection state across interactions with improved performance
 
 #### Responsive Design Adaptations
-- **Dynamic Sizing**: Percentage-based snap points adapt to screen sizes
-- **Content Padding**: Bottom padding accommodates floating action buttons
-- **Scroll Behavior**: Optimized FlatList for large tournament datasets
-- **Loading States**: Graceful loading indicators with retry capabilities
+- **Fixed Sizing**: Pixel-based snap points provide consistent behavior across devices
+- **Safe Area Padding**: Dynamic bottom padding accommodates floating action buttons and device notches
+- **Scroll Behavior**: Optimized FlatList for large tournament datasets with responsive performance
+- **Loading States**: Graceful loading indicators with retry capabilities and proper spacing
+
+**Updated** Enhanced responsive design with safe area handling and refined footer spacing
 
 **Section sources**
 - [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L55-L100)
@@ -281,11 +327,13 @@ participant BS as BottomSheet Instance
 participant FC as FilterContext
 Parent->>BS : Initialize Ref
 Parent->>BS : snapToIndex(0)
-BS->>FS : Render with snapPoints
+BS->>FS : Render with safe area insets
 FS->>FC : Load pending filters
-FS->>FS : Display tournament list
+FS->>FS : Apply fixed pixel snap points
+FS->>FS : Display tournament list with responsive design
 User->>FS : Select tournaments
 FS->>FC : Update pending state
+FS->>FS : Trigger haptic feedback
 User->>FS : Tap Apply
 FS->>FC : applyFilters()
 FC->>Parent : Update active filters
@@ -311,28 +359,28 @@ subgraph "External Dependencies"
 BS[@gorhom/bottom-sheet]
 RQ[React Query]
 RN[React Native]
+RSAC[react-native-safe-area-context]
 end
 subgraph "Internal Dependencies"
 FC[FilterContext]
 UT[useTournaments]
-TA[tournamentApi]
-TT[tournament types]
 CTS[constants]
+HT[haptics]
 end
 subgraph "UI Components"
 FS[FilterSheet]
 SS[SportSection]
-ML[MatchList]
+IDX[Index]
 end
 FS --> BS
 FS --> FC
 FS --> UT
+FS --> RSAC
 FS --> SS
 SS --> CTS
+SS --> HT
 UT --> RQ
-UT --> TA
-TA --> TT
-ML --> FS
+IDX --> FS
 FC --> FS
 ```
 
@@ -340,11 +388,13 @@ FC --> FS
 - [FilterSheet.tsx](file://app/components/filter/FilterSheet.tsx#L1-L9)
 - [FilterContext.tsx](file://app/context/FilterContext.tsx#L1-L1)
 - [useTournaments.ts](file://app/hooks/useTournaments.ts#L1-L3)
-- [tournamentApi.ts](file://app/services/tournamentApi.ts#L1-L2)
 - [constants.ts](file://app/utils/constants.ts#L1-L38)
+- [haptics.ts](file://app/utils/haptics.ts#L1-L33)
+- [index.tsx](file://app/index.tsx#L1-L5)
 
 Key dependency characteristics:
 - **External Libraries**: Minimal external dependencies focused on specific functionality
+- **Safe Area Integration**: Uses react-native-safe-area-context for proper device-specific spacing
 - **Internal Cohesion**: Strong internal cohesion within the filter module
 - **Type Safety**: Comprehensive TypeScript typing throughout the implementation
 - **Hook Integration**: Seamless integration with React Query for data management
@@ -355,12 +405,13 @@ Key dependency characteristics:
 - [useTournaments.ts](file://app/hooks/useTournaments.ts#L1-L3)
 
 ## Performance Considerations
-The implementation incorporates several performance optimizations:
+The implementation incorporates several performance optimizations with enhanced mobile responsiveness:
 
 ### Memory Management
 - **Component Memoization**: SportSection uses React.memo to prevent unnecessary re-renders
 - **Callback Optimization**: useCallback hooks prevent function recreation on each render
 - **State Management**: Efficient state updates minimize re-render cycles
+- **Safe Area Optimization**: useSafeAreaInsets hook prevents unnecessary calculations
 
 ### Data Fetching Optimization
 - **Query Caching**: React Query provides intelligent caching with configurable stale times
@@ -371,6 +422,12 @@ The implementation incorporates several performance optimizations:
 - **FlatList Optimization**: Efficient list rendering with virtualization
 - **Conditional Rendering**: Loading and error states prevent unnecessary DOM updates
 - **CSS-in-JS**: Tailwind classes provide efficient styling without runtime overhead
+- **Fixed Pixel Performance**: Pixel-based sizing eliminates percentage calculation overhead
+
+### Mobile Responsiveness Optimization
+- **Safe Area Calculation**: Dynamic bottom inset calculation optimized for device-specific layouts
+- **Responsive Snap Points**: Fixed pixel values eliminate percentage-based recalculations
+- **Touch Target Optimization**: Enhanced pressable areas improve usability on various screen sizes
 
 ## Troubleshooting Guide
 Common issues and their solutions:
@@ -380,12 +437,12 @@ Common issues and their solutions:
 **Causes**: 
 - BottomSheet ref not properly initialized
 - Parent component not wrapped with BottomSheetModalProvider
-- Snap points configuration issues
+- Snap points configuration issues with fixed pixel values
 
 **Solutions**:
 - Verify BottomSheet ref initialization in parent component
 - Ensure _layout.tsx wraps the app with BottomSheetModalProvider
-- Check snapPoints array format and values
+- Check snapPoints array format and values (now [300, 500])
 
 ### Filters Not Applying
 **Symptoms**: Selected tournaments don't affect match list
@@ -398,6 +455,18 @@ Common issues and their solutions:
 - Verify applyFilters() is called before closing
 - Ensure FilterProvider wraps the application
 - Check useFilter hook usage in parent component
+
+### Safe Area Issues
+**Symptoms**: Content appears behind notch or understatus bar
+**Causes**:
+- useSafeAreaInsets hook not properly integrated
+- Bottom inset calculation errors
+- Device-specific safe area variations
+
+**Solutions**:
+- Verify useSafeAreaInsets import and usage
+- Check bottomInset calculation: `insets.bottom + 70`
+- Test on various device simulators with different notch configurations
 
 ### Data Loading Issues
 **Symptoms**: Loading spinner stuck or error state not showing
@@ -420,8 +489,11 @@ Common issues and their solutions:
 The FilterSheet component represents a well-architected solution for tournament filtering in a React Native application. Its implementation demonstrates:
 
 - **Clean Architecture**: Clear separation of concerns between UI, state, and data layers
-- **User Experience**: Thoughtful gesture handling, visual feedback, and responsive design
+- **Enhanced User Experience**: Thoughtful gesture handling, visual feedback, and responsive design with safe area integration
 - **Technical Excellence**: Robust state management, efficient data fetching, and performance optimizations
+- **Mobile-First Design**: Comprehensive mobile responsiveness with device-specific adaptations
 - **Maintainability**: Well-structured code with comprehensive type safety and testing considerations
 
 The component successfully integrates multiple libraries and patterns while maintaining simplicity and reliability. Its modular design allows for easy extension and modification, making it a solid foundation for future enhancements such as advanced filtering options, search functionality, or additional sport categories.
+
+**Updated** The recent enhancements significantly improve mobile responsiveness and device compatibility, making the FilterSheet more robust across diverse device configurations and screen sizes.
