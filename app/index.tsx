@@ -1,11 +1,6 @@
-import { Text, View } from "react-native";
+import React from "react";
+import MatchListScreen from "../src/screens/MatchListScreen";
 
 export default function Index() {
-  return (
-    <View className="flex-1 bg-white">
-      <Text className="text-2xl font-bold text-center mt-10">
-        Hello, World!
-      </Text>
-    </View>
-  );
+  return <MatchListScreen />;
 }
